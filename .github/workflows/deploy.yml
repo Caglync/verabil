@@ -22,8 +22,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Zip package
+        run: zip -r deploy.zip . -x "*.git*" -x "venv/*" -x "__pycache__/*" -x "*.pyc"
+
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: verabil-api
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: deploy.zip
+          startup-command: 'gunicorn --bind=0.0.0.0:8000 --timeout 600 "app:create_app()"'
