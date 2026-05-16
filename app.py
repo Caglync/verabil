@@ -3,11 +3,16 @@ VeraBil — Flask Application Entry Point
 """
 
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 
 from config import Config
 from routes.analyze import analyze_bp
+
+# Resolve the frontend directory relative to this file
+_FRONTEND_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "frontend")
+)
 
 
 def create_app() -> Flask:
@@ -23,6 +28,15 @@ def create_app() -> Flask:
     @app.get("/health")
     def health():
         return {"status": "ok", "service": "VeraBil API", "version": "1.0.0"}
+
+    # ── Serve frontend static files ───────────────────────────
+    @app.route("/")
+    def index():
+        return send_from_directory(_FRONTEND_DIR, "index.html")
+
+    @app.route("/<path:filename>")
+    def frontend(filename):
+        return send_from_directory(_FRONTEND_DIR, filename)
 
     return app
 
